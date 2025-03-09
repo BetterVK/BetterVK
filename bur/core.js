@@ -8,12 +8,19 @@ window.BetterVK = {
 };
 
 function addBetterVKSettings() {
-    const settingsContainer = document.querySelector('[data-testid="settings-sidebar"]');
+    console.log("🔍 Поиск контейнера настроек VK...");
+
+    const settingsContainer = document.querySelector('[data-testid="settings-sidebar"]') || 
+                              document.querySelector('.SidebarSettings') || 
+                              document.querySelector('.settings-menu');
+
     if (!settingsContainer) {
-        console.warn("⚠️ Не найден контейнер настроек! Ожидание...");
+        console.warn("⚠️ Контейнер настроек не найден! Ожидание 1 секунду...");
         setTimeout(addBetterVKSettings, 1000);
         return;
     }
+
+    console.log("✅ Контейнер настроек найден:", settingsContainer);
 
     let betterVKButton = document.createElement("div");
     betterVKButton.className = "settings-item";
@@ -35,14 +42,23 @@ function addBetterVKSettings() {
 
     betterVKButton.onclick = openBetterVKSettings;
     settingsContainer.appendChild(betterVKButton);
+
+    console.log("✅ Кнопка BetterVK добавлена в настройки!");
 }
 
 function openBetterVKSettings() {
-    const mainContainer = document.querySelector('[data-testid="settings-content"]');
+    console.log("📂 Открываем настройки BetterVK...");
+    
+    const mainContainer = document.querySelector('[data-testid="settings-content"]') || 
+                          document.querySelector('.SettingsMain') || 
+                          document.querySelector('.settings-container');
+
     if (!mainContainer) {
-        console.error("❌ Не найден контейнер содержимого настроек!");
+        console.error("❌ Контейнер содержимого настроек не найден!");
         return;
     }
+
+    console.log("✅ Контейнер настроек найден:", mainContainer);
 
     mainContainer.innerHTML = `
         <h2 style="color: white;">⚙️ Настройки BetterVK</h2>
@@ -50,6 +66,8 @@ function openBetterVKSettings() {
         <button style="margin: 10px; padding: 10px; border: none; background: #444; color: white; cursor: pointer; border-radius: 5px;" onclick="window.BetterVK.reloadPlugins()">🔌 Перезагрузить плагины</button>
         <button style="margin: 10px; padding: 10px; border: none; background: #444; color: white; cursor: pointer; border-radius: 5px;" onclick="window.BetterVK.reloadThemes()">🎨 Перезагрузить темы</button>
     `.trim();
+    
+    console.log("✅ Окно настроек BetterVK загружено!");
 }
 
 function loadPlugins() {
@@ -87,6 +105,7 @@ function loadThemes() {
 }
 
 window.onload = () => {
+    console.log("🔄 Запуск BetterVK...");
     addBetterVKSettings();
     loadPlugins();
     loadThemes();
