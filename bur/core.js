@@ -1,112 +1,104 @@
-console.log("✅ BetterVK загружен и активирован!");
+console.log("🔥 BetterVK загружен!");
 
 window.BetterVK = {
+    plugins: [],
+    themes: [],
+
     sendMessage: (text) => console.log("💬 Сообщение:", text),
-    modifyUI: () => document.body.style.background = "#222",
-    reloadPlugins: () => loadPlugins(),
-    reloadThemes: () => loadThemes(),
+
+    modifyUI: () => document.body.style.background = "#19191A",
+
+    openSettings: () => {
+        let settingsWindow = document.getElementById("bettervk-settings");
+        if (settingsWindow) {
+            settingsWindow.style.display = "block";
+            return;
+        }
+
+        settingsWindow = document.createElement("div");
+        settingsWindow.id = "bettervk-settings";
+        settingsWindow.style = `
+            position: fixed; 
+            top: 50px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 400px; 
+            height: 500px; 
+            background: #222; 
+            color: white; 
+            padding: 20px; 
+            z-index: 10000;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        `;
+
+        settingsWindow.innerHTML = `
+            <h3>⚙️ BetterVK - Настройки</h3>
+            <button onclick="window.BetterVK.installPlugin()">📦 Установить плагин</button>
+            <button onclick="window.BetterVK.listPlugins()">📜 Список плагинов</button>
+            <button onclick="window.BetterVK.closeSettings()">❌ Закрыть</button>
+        `;
+
+        document.body.appendChild(settingsWindow);
+    },
+
+    closeSettings: () => {
+        let settingsWindow = document.getElementById("bettervk-settings");
+        if (settingsWindow) {
+            settingsWindow.style.display = "none";
+        }
+    },
+
+    addMenuButton: () => {
+        if (!window.location.pathname.includes("im")) return; // Добавляем меню только в VK Me
+
+        let menu = document.getElementById("bettervk-menu");
+        if (menu) return;
+
+        menu = document.createElement("div");
+        menu.id = "bettervk-menu";
+        menu.style = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #19191A;
+            color: white;
+            padding: 10px;
+            z-index: 9999;
+            border-radius: 5px;
+        `;
+
+        menu.innerHTML = `
+            <h3>⚙️ BetterVK</h3>
+            <button onclick="window.BetterVK.modifyUI()">🎨 Изменить UI</button>
+            <button onclick="window.BetterVK.openSettings()">🔧 Настройки</button>
+        `;
+
+        document.body.appendChild(menu);
+    },
+
+    installPlugin: () => {
+        let pluginUrl = prompt("Введите URL плагина:");
+        if (!pluginUrl) return;
+
+        fetch(pluginUrl)
+            .then(res => res.text())
+            .then(code => {
+                eval(code);
+                window.BetterVK.plugins.push(pluginUrl);
+                console.log(`✅ Плагин установлен: ${pluginUrl}`);
+                alert("Плагин установлен!");
+            })
+            .catch(err => console.error("❌ Ошибка загрузки плагина:", err));
+    },
+
+    listPlugins: () => {
+        alert("Установленные плагины:\n" + window.BetterVK.plugins.join("\n"));
+    }
 };
 
-function addBetterVKSettings() {
-    console.log("🔍 Поиск контейнера настроек VK...");
-
-    const settingsContainer = document.querySelector('[data-testid="settings-sidebar"]') || 
-                              document.querySelector('.SidebarSettings') || 
-                              document.querySelector('.settings-menu');
-
-    if (!settingsContainer) {
-        console.warn("⚠️ Контейнер настроек не найден! Ожидание 1 секунду...");
-        setTimeout(addBetterVKSettings, 1000);
-        return;
-    }
-
-    console.log("✅ Контейнер настроек найден:", settingsContainer);
-
-    let betterVKButton = document.createElement("div");
-    betterVKButton.className = "settings-item";
-    betterVKButton.innerHTML = `
-        <span class="settings-icon">⚙️</span>
-        <span class="settings-text">BetterVK</span>
-    `;
-    betterVKButton.style = `
-        display: flex;
-        align-items: center;
-        padding: 10px;
-        cursor: pointer;
-        font-size: 14px;
-        color: white;
-        background: rgb(25, 25, 26);
-        border-radius: 5px;
-        margin: 5px 0;
-    `;
-
-    betterVKButton.onclick = openBetterVKSettings;
-    settingsContainer.appendChild(betterVKButton);
-
-    console.log("✅ Кнопка BetterVK добавлена в настройки!");
-}
-
-function openBetterVKSettings() {
-    console.log("📂 Открываем настройки BetterVK...");
-    
-    const mainContainer = document.querySelector('[data-testid="settings-content"]') || 
-                          document.querySelector('.SettingsMain') || 
-                          document.querySelector('.settings-container');
-
-    if (!mainContainer) {
-        console.error("❌ Контейнер содержимого настроек не найден!");
-        return;
-    }
-
-    console.log("✅ Контейнер настроек найден:", mainContainer);
-
-    mainContainer.innerHTML = `
-        <h2 style="color: white;">⚙️ Настройки BetterVK</h2>
-        <button style="margin: 10px; padding: 10px; border: none; background: #444; color: white; cursor: pointer; border-radius: 5px;" onclick="window.BetterVK.modifyUI()">🎨 Изменить UI</button>
-        <button style="margin: 10px; padding: 10px; border: none; background: #444; color: white; cursor: pointer; border-radius: 5px;" onclick="window.BetterVK.reloadPlugins()">🔌 Перезагрузить плагины</button>
-        <button style="margin: 10px; padding: 10px; border: none; background: #444; color: white; cursor: pointer; border-radius: 5px;" onclick="window.BetterVK.reloadThemes()">🎨 Перезагрузить темы</button>
-    `.trim();
-    
-    console.log("✅ Окно настроек BetterVK загружено!");
-}
-
-function loadPlugins() {
-    fetch("https://raw.githubusercontent.com/BetterVK/BetterVK/main/plugins/plugins.json")
-        .then(res => res.json())
-        .then(plugins => {
-            plugins.forEach(plugin => {
-                fetch(plugin.url)
-                    .then(res => res.text())
-                    .then(code => {
-                        let script = document.createElement("script");
-                        script.textContent = code;
-                        document.body.appendChild(script);
-                        console.log(`✅ Плагин загружен: ${plugin.name}`);
-                    })
-                    .catch(err => console.error(`❌ Ошибка загрузки плагина ${plugin.name}:`, err));
-            });
-        })
-        .catch(err => console.error("❌ Ошибка загрузки списка плагинов:", err));
-}
-
-function loadThemes() {
-    fetch("https://raw.githubusercontent.com/BetterVK/BetterVK/main/themes/themes.json")
-        .then(res => res.json())
-        .then(themes => {
-            themes.forEach(theme => {
-                let link = document.createElement("link");
-                link.rel = "stylesheet";
-                link.href = theme.url;
-                document.head.appendChild(link);
-                console.log(`✅ Тема загружена: ${theme.name}`);
-            });
-        })
-        .catch(err => console.error("❌ Ошибка загрузки списка тем:", err));
-}
-
 window.onload = () => {
-    console.log("🔄 Запуск BetterVK...");
-    addBetterVKSettings();
-    loadPlugins();
-    loadThemes();
+    setTimeout(window.BetterVK.addMenuButton, 2000);
 };
