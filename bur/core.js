@@ -11,14 +11,12 @@ function addBetterVKMenu() {
     let menu = document.createElement("div");
     menu.id = "bettervk-menu";
     menu.style = "position: fixed; top: 10px; right: 10px; background: #333; color: white; padding: 10px; z-index: 9999; border-radius: 5px;";
-    menu.innerHTML = \`
-        <h3>⚙️ BetterVK</h3>
-        <button onclick="window.BetterVK.modifyUI()">🎨 Изменить UI</button>
-        <button onclick="window.BetterVK.reloadPlugins()">🔌 Перезагрузить плагины</button>
-        <button onclick="window.BetterVK.reloadThemes()">🎨 Перезагрузить темы</button>
-    \`;
-    document.body.appendChild(menu);
-}
+    menu.innerHTML = `
+    <h3>⚙️ BetterVK</h3>
+    <button onclick="window.BetterVK.modifyUI()">🎨 Изменить UI</button>
+    <button onclick="window.BetterVK.reloadPlugins()">🔌 Перезагрузить плагины</button>
+    <button onclick="window.BetterVK.reloadThemes()">🎨 Перезагрузить темы</button>
+`.trim();
 
 function loadPlugins() {
     fetch("https://raw.githubusercontent.com/BetterVK/BetterVK/main/plugins/plugins.json")
