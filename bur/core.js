@@ -111,3 +111,5 @@ window.onload = () => {
         if (window.BetterVK.enabled) window.BetterVK.openSettings();
     }, 2000);
 };
+
+console.log("🔥 Скрипт начал выполняться");
