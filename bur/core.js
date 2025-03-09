@@ -3,6 +3,7 @@ console.log("🔥 BetterVK загружен!");
 window.BetterVK = {
     plugins: [],
     themes: [],
+    enabled: true,
 
     sendMessage: (text) => console.log("💬 Сообщение:", text),
 
@@ -38,6 +39,8 @@ window.BetterVK = {
             <h3>⚙️ BetterVK - Настройки</h3>
             <button onclick="window.BetterVK.installPlugin()">📦 Установить плагин</button>
             <button onclick="window.BetterVK.listPlugins()">📜 Список плагинов</button>
+            <button onclick="window.BetterVK.disable()">🚨 Отключить BetterVK</button>
+            <button onclick="window.BetterVK.reload()">♻️ Перезапустить</button>
             <button onclick="window.BetterVK.closeSettings()">❌ Закрыть</button>
         `;
 
@@ -49,34 +52,6 @@ window.BetterVK = {
         if (settingsWindow) {
             settingsWindow.style.display = "none";
         }
-    },
-
-    addMenuButton: () => {
-        if (!window.location.pathname.includes("im")) return; // Добавляем меню только в VK Me
-
-        let menu = document.getElementById("bettervk-menu");
-        if (menu) return;
-
-        menu = document.createElement("div");
-        menu.id = "bettervk-menu";
-        menu.style = `
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #19191A;
-            color: white;
-            padding: 10px;
-            z-index: 9999;
-            border-radius: 5px;
-        `;
-
-        menu.innerHTML = `
-            <h3>⚙️ BetterVK</h3>
-            <button onclick="window.BetterVK.modifyUI()">🎨 Изменить UI</button>
-            <button onclick="window.BetterVK.openSettings()">🔧 Настройки</button>
-        `;
-
-        document.body.appendChild(menu);
     },
 
     installPlugin: () => {
@@ -95,10 +70,44 @@ window.BetterVK = {
     },
 
     listPlugins: () => {
+        console.log("📜 Установленные плагины:", window.BetterVK.plugins);
         alert("Установленные плагины:\n" + window.BetterVK.plugins.join("\n"));
-    }
+    },
+
+    disable: () => {
+        console.warn("🚨 BetterVK отключен!");
+        window.BetterVK.enabled = false;
+        document.getElementById("bettervk-menu")?.remove();
+        document.getElementById("bettervk-settings")?.remove();
+    },
+
+    reload: () => {
+        console.log("♻️ Перезапуск BetterVK...");
+        window.location.reload();
+    },
+
+    log: (message) => console.log(`[BetterVK] ${message}`)
 };
 
+window.bvk = {
+    help: () => {
+        console.log("🔹 Команды BetterVK:");
+        console.log("📦 bvk.installPlugin() - Установить плагин");
+        console.log("📜 bvk.listPlugins() - Список установленных плагинов");
+        console.log("🚨 bvk.disable() - Отключить BetterVK");
+        console.log("♻️ bvk.reload() - Перезапустить BetterVK");
+    },
+
+    installPlugin: window.BetterVK.installPlugin,
+    listPlugins: window.BetterVK.listPlugins,
+    disable: window.BetterVK.disable,
+    reload: window.BetterVK.reload
+};
+
+console.log("✅ BetterVK Dev Console готова! Введите `bvk.help()` для списка команд.");
+
 window.onload = () => {
-    setTimeout(window.BetterVK.addMenuButton, 2000);
+    setTimeout(() => {
+        if (window.BetterVK.enabled) window.BetterVK.openSettings();
+    }, 2000);
 };
