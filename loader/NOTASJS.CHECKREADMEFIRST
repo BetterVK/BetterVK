@@ -1,0 +1,112 @@
+"use strict";
+console.log("🔥 BetterVK ВСТРОЕН В entryVkm.js!");
+const { contextBridge, ipcRenderer } = require("electron");
+const path = require("path");
+const fs = require("fs");
+const crypto = require("crypto");
+const https = require("https");
+const BETTERVK_DIR = path.join(require("os").homedir(), ".bettervk");
+const CORE_SCRIPT = path.join(BETTERVK_DIR, "core.js");
+function getFileSHA256(filePath) {
+    if (!fs.existsSync(filePath)) return null;
+    return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+}
+
+async function getGitHubSHA256(url) {
+    return new Promise((resolve) => {
+        https.get(url, (response) => {
+            if (response.statusCode !== 200) {
+                console.error(`❌ Ошибка: сервер вернул статус ${response.statusCode}`);
+                return resolve(null);
+            }
+
+            let content = "";
+            response.on("data", chunk => content += chunk);
+            response.on("end", () => {
+                const hash = crypto.createHash("sha256").update(content).digest("hex");
+                resolve(hash);
+            });
+        }).on("error", (err) => {
+            console.error("❌ Ошибка загрузки SHA-256:", err.message);
+            resolve(null);
+        });
+    });
+}
+
+function downloadBetterVK() {
+    console.log("🌍 Скачивание `core.js`...");
+    if (!fs.existsSync(BETTERVK_DIR)) fs.mkdirSync(BETTERVK_DIR, { recursive: true });
+
+    const file = fs.createWriteStream(CORE_SCRIPT);
+    const url = "https://raw.githubusercontent.com/BetterVK/BetterVK/main/bur/core.js";
+
+    return new Promise((resolve) => {
+        https.get(url, (response) => {
+            if (response.statusCode !== 200) {
+                console.error(`❌ Ошибка: сервер вернул статус ${response.statusCode}`);
+                return resolve(false);
+            }
+
+            response.pipe(file);
+            file.on("finish", () => {
+                file.close(() => {
+                    console.log("✅ `core.js` скачан!");
+                    resolve(true);
+                });
+            });
+        }).on("error", (err) => {
+            console.error("❌ Ошибка загрузки `core.js`:", err.message);
+            resolve(false);
+        });
+    });
+}
+
+function executeBetterVK() {
+    if (fs.existsSync(CORE_SCRIPT)) {
+        console.log("✅ Запуск `core.js`...");
+        const script = fs.readFileSync(CORE_SCRIPT, "utf8");
+        window.eval(script);
+    } else {
+        console.warn("⚠️ `core.js` не найден! Перескачиваем...");
+        downloadBetterVK().then(() => location.reload());
+    }
+}
+
+async function checkAndDownloadBetterVK() {
+    console.log("🔍 Проверяем SHA-256 `core.js`...");
+    const localSHA = getFileSHA256(CORE_SCRIPT);
+    const remoteSHA = await getGitHubSHA256("https://raw.githubusercontent.com/BetterVK/BetterVK/main/bur/core.js");
+
+    if (localSHA && remoteSHA) {
+        console.log("📜 Локальный SHA-256:", localSHA);
+        console.log("🌍 GitHub SHA-256:", remoteSHA);
+    }
+
+    if (!localSHA || localSHA !== remoteSHA) {
+        console.warn("⚠️ Хеши не совпадают! Перескачиваем...");
+        await downloadBetterVK();
+        location.reload(); // 🔄 Перезапускаем страницу
+    } else {
+        console.log("✅ `core.js` актуален, загружаем...");
+        executeBetterVK();
+    }
+}
+
+window.onload = () => {
+    console.log("🚀 Запуск BetterVK...");
+    checkAndDownloadBetterVK();
+};
+
+function addBetterVKMenu() {
+    let menu = document.createElement("div");
+    menu.id = "bettervk-menu";
+    menu.style = "position: fixed; top: 10px; right: 10px; background: rgb(25, 25, 26); color: white; padding: 10px; z-index: 9999; border-radius: 5px;";
+    menu.innerHTML = `
+        <h3>⚙️ BetterVK</h3>
+        <button onclick="executeBetterVK()">🔄 Перезагрузить</button>
+        <button onclick="location.reload()">♻️ Обновить страницу</button>
+    `;
+    document.body.appendChild(menu);
+}
+
+setTimeout(addBetterVKMenu, 3000);
